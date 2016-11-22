@@ -21,6 +21,16 @@ import javax.ws.rs.core.Response;
 import java.util.Base64;
 import javax.imageio.ImageIO;
 import org.bytedeco.javacpp.opencv_core.Mat;
+import org.bytedeco.javacpp.opencv_core.Rect;
+import org.bytedeco.javacpp.opencv_core.RectVector;
+import org.bytedeco.javacpp.opencv_core.Size;
+import org.bytedeco.javacpp.opencv_face.FaceRecognizer;
+import static org.bytedeco.javacpp.opencv_face.createFisherFaceRecognizer;
+import static org.bytedeco.javacpp.opencv_imgproc.COLOR_BGRA2GRAY;
+import static org.bytedeco.javacpp.opencv_imgproc.cvtColor;
+import static org.bytedeco.javacpp.opencv_imgproc.equalizeHist;
+import static org.bytedeco.javacpp.opencv_imgproc.resize;
+import org.bytedeco.javacpp.opencv_objdetect.CascadeClassifier;
 import org.bytedeco.javacv.Java2DFrameConverter;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 
@@ -76,9 +86,13 @@ public class EstimadorEdad {
             BufferedImage img = ImageIO.read(new ByteArrayInputStream(buffer));
             OpenCVFrameConverter.ToMat cv = new OpenCVFrameConverter.ToMat(); 
             org.bytedeco.javacpp.opencv_core.Mat resultado = cv.convertToMat(new Java2DFrameConverter().convert(img));
-            mensaje = "La imagen tiene: " + resultado.cols() + " pixeles de alto y " + resultado.rows() + " pixeles de ancho";
-            
-            
+            int alto = resultado.cols();
+            int ancho = resultado.rows();
+            resize(resultado, resultado, new Size(200, 200));
+            FaceRecognizer faceRecognizer1 = createFisherFaceRecognizer();
+            faceRecognizer1.load("C:\\Users\\Hitzu\\Documents\\NetBeansProjects\\Clasificador-de-edad-escritorio\\Eigenfaces.yml");
+            int predictedLabel = faceRecognizer1.predict(resultado);
+            mensaje = "La imagen tiene: " + alto + " pixeles de alto y " + ancho + " pixeles de ancho y tiene: " + predictedLabel + " años";
         }   
         catch(Exception e)
         {
